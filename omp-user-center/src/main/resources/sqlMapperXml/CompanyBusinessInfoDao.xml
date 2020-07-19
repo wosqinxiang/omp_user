@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ahdms.user.center.dao.ICompanyBusinessInfoDao">
+
+    <sql id="Base_Column_List">
+        id,com_business_id,customer_id,company_name,company_code,company_pic,legal_name,legal_contact_info,contact_name,contact_idcard,contact_phone,company_type,company_address,company_servcie_code,company_email,status,audit_id,info_desc,created_at
+    </sql>
+
+
+</mapper>

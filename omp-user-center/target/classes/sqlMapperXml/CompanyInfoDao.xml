@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ahdms.user.center.dao.ICompanyInfoDao">
+
+    <sql id="Base_Column_List">
+        id,company_id,company_name,company_code,type,audit_status,audit_id,status,trade,area,company_business_id,pay_info_id,created_by,created_at,updated_by,updated_at
+    </sql>
+
+    <select id="pageCompanyInfo"
+            resultType="com.ahdms.user.center.bean.vo.SupplierCompanyPageRspVo">
+        SELECT
+            com.company_id,
+            com.`status`,
+            com.audit_status,
+            com.company_name,
+            com.company_code,
+            cb.company_busi_code
+        FROM
+            company_info com,
+            company_business_info cb
+        WHERE
+            com.company_id = cb.customer_id
+        <if test="type != null and type != 0 ">
+            and com.type = #{type}
+        </if>
+        <if test="reqVo.companyName != null and reqVo.companyName !='' ">
+            and com.company_name like concat(#{reqVo.companyName},'%')
+        </if>
+        <if test="reqVo.companyCode != null and reqVo.companyCode !='' ">
+            and com.company_code like concat(#{reqVo.companyCode},'%')
+        </if>
+        <if test="reqVo.companyBusiCode != null and reqVo.companyBusiCode !='' ">
+            and cb.company_busi_code like concat(#{reqVo.companyBusiCode},'%')
+        </if>
+
+    </select>
+
+
+</mapper>

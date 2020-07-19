@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ahdms.user.center.dao.ICustomerInfoDao">
+
+    <sql id="Base_Column_List">
+        id,customer_id,user_id,audit_status,auth_status,secret_id,secret_key,created_by,created_at,updated_by,updated_at
+    </sql>
+
+    <select id="pageCustomer" parameterType="com.ahdms.user.center.bean.vo.CustomerInfoPageReqVo"
+            resultType="com.ahdms.user.center.bean.bo.CustomerInfoPageRspBo">
+        SELECT u.mobile,
+               u.username,
+               c.customer_id,
+               c.company_name,
+               c.audit_status,
+               c.auth_status,
+               c.secret_id,
+               c.secret_key
+        FROM
+             user u,customer_info c
+        WHERE
+              u.user_id = c.user_id
+        <if test="customerInfoPageReqVo.username != null and customerInfoPageReqVo.username !='' ">
+            and u.username like concat(#{customerInfoPageReqVo.username},'%')
+        </if>
+        <if test="customerInfoPageReqVo.mobile != null and customerInfoPageReqVo.mobile !='' ">
+            and u.mobile like concat(#{customerInfoPageReqVo.mobile},'%')
+        </if>
+        <if test="customerInfoPageReqVo.companyName != null and customerInfoPageReqVo.companyName !='' ">
+            and c.company_name like concat(#{customerInfoPageReqVo.companyName},'%')
+        </if>
+        ORDER BY c.created_at
+
+    </select>
+
+
+</mapper>

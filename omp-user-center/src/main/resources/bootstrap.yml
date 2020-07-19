@@ -1,0 +1,13 @@
+server:
+  port: 7001
+
+spring:
+  application:
+    name: "@artifactId@"
+  profiles:
+    active: "@spring.profiles.active@"
+
+
+omp:
+  server:
+    shortName: USR

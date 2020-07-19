@@ -1,0 +1,13 @@
+server:
+  port: 7001
+
+spring:
+  application:
+    name: "omp-user-center"
+  profiles:
+    active: "dev"
+
+
+omp:
+  server:
+    shortName: USR
