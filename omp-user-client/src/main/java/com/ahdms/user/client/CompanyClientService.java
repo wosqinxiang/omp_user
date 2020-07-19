@@ -1,10 +1,14 @@
 package com.ahdms.user.client;
 
 import com.ahdms.user.client.vo.CompanyInfoRmiRspVo;
+import com.ahdms.user.client.vo.PayInfoRspVo;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -20,7 +24,7 @@ public interface CompanyClientService {
      * @return
      */
     @GetMapping("info")
-    CompanyInfoRmiRspVo getCompanyInfo(Long userId);
+    CompanyInfoRmiRspVo getCompanyInfo(@Validated @NotNull @RequestParam("userId")Long userId);
 
     /**
      * 获取用户下 所有启用的代理商或依赖方
@@ -28,6 +32,14 @@ public interface CompanyClientService {
      * @return
      */
     @GetMapping("infos")
-    List<CompanyInfoRmiRspVo> getCompanyInfos(Long userId);
+    List<CompanyInfoRmiRspVo> getCompanyInfos(@Validated @NotNull @RequestParam("userId")Long userId);
+
+    /**
+     * 根据商家业务主键查询支付账号信息
+     * @param companyId
+     * @return
+     */
+    @GetMapping("getPayInfos")
+    PayInfoRspVo getPayInfos(@Validated @NotNull @RequestParam("companyId") Long companyId);
 
 }

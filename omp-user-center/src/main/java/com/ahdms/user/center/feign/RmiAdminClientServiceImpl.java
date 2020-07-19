@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 @Validated
 @RestController
-@RequestMapping("/rmi/user/company")
+@RequestMapping("/rmi/user/admin")
 @Api("Rmi-User控制器")
 public class RmiAdminClientServiceImpl implements AdminClientService {
     @Autowired
