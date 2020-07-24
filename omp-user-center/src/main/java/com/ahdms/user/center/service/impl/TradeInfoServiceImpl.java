@@ -1,13 +1,17 @@
 package com.ahdms.user.center.service.impl;
 
+import com.ahdms.framework.core.commom.util.BeanUtils;
 import com.ahdms.framework.mybatis.service.impl.BaseServiceImpl;
+import com.ahdms.user.center.bean.bo.TradeInfoBo;
+import com.ahdms.user.center.bean.entity.TradeInfo;
 import com.ahdms.user.center.dao.ITradeInfoDao;
 import com.ahdms.user.center.service.ITradeInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.ahdms.user.center.bean.entity.TradeInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 /**
  * <B>说明：服务实现</B><BR>
@@ -23,5 +27,10 @@ public class TradeInfoServiceImpl extends BaseServiceImpl<ITradeInfoDao, TradeIn
     @Autowired
     private ITradeInfoDao tradeInfoDao;
 
+    @Override
+    public List<TradeInfoBo> listLevel() {
+        List<TradeInfo> tradeInfos = super.list();
+        return BeanUtils.copy(tradeInfos,TradeInfoBo.class);
+    }
 }
 

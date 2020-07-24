@@ -4,7 +4,6 @@ import com.ahdms.user.center.bean.bo.AuditInfoReqBo;
 import com.ahdms.user.center.bean.bo.ComBusiRecordRspBo;
 import com.ahdms.user.center.bean.bo.CompanyBusinessReqBo;
 import com.ahdms.user.center.bean.vo.CompanyBusinessInfoRspVo;
-import com.ahdms.user.center.bean.vo.CustomerComBusiRspVo;
 import com.ahdms.user.center.service.ICompanyBusinessInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -85,7 +84,7 @@ public class CompanyBusinessInfoController {
     @ApiOperation(value = "查看企业商务信息变更记录列表", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ApiImplicitParam(paramType="query", name = "customerId", value = "客户业主主键", required = false, dataType = "String")
     public List<ComBusiRecordRspBo> getCompanyBussRecords(@RequestParam(required = false) String customerId){
-
+        // TODO 代码简洁，直接 return companyBusinessInfoService.getCompanyBussRecords(customerId);
         List<ComBusiRecordRspBo> records = companyBusinessInfoService.getCompanyBussRecords(customerId);
         return records;
     }

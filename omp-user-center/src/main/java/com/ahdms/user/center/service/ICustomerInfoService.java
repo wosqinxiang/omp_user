@@ -3,7 +3,7 @@ package com.ahdms.user.center.service;
 import com.ahdms.framework.mybatis.service.BaseService;
 import com.ahdms.user.center.bean.bo.*;
 import com.ahdms.user.center.bean.entity.CustomerInfo;
-import com.ahdms.user.center.bean.vo.CustomerInfoPageReqVo;
+import com.ahdms.user.center.bean.vo.MobileSmsCodeVo;
 import com.ahdms.user.client.vo.CustomerBasicInfoRspVo;
 import com.ahdms.user.client.vo.UserLoginRspVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -18,13 +18,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface ICustomerInfoService extends BaseService<CustomerInfo> {
 
 
-    void setBasicInfo(CustomerInfoReqBo customerInfoReqBo);
+    void setBasicInfo(CustomerInfoBasicBo customerInfoReqBo);
 
     UserLoginRspVo register(String mobile, String smsCode);
 
     String sendSmsCode(String mobile);
 
-    IPage<CustomerInfoPageRspBo> pageCustomer(CustomerInfoPageReqVo customerInfoPageReqVo);
+    IPage<CustomerInfoPageBo> pageCustomer(CustomerPageBo customerPageBo);
 
     void updateMobile(String mobile, String smsCode);
 
@@ -32,13 +32,17 @@ public interface ICustomerInfoService extends BaseService<CustomerInfo> {
 
     UserLoginRspVo checkEmail(String email);
 
-    void resetPassword(String newPwd);
+    void resetPassword(MobileSmsCodeVo mobileVo);
 
     String checkSmsCode(String mobile, String smsCode);
 
     void checkUsername(String username);
 
-    CustomerBasicInfoRspVo getCustomerBasicInfo(Long userId);
+    CustomerDetailBo getCustomerBasicInfo(Long userId);
 
-    void backPassword(String mobile, String smsCode);
+    MobileSmsCodeBo backPassword(MobileSmsCodeBo mobileSmsCodeBo);
+
+    CustomerInfo selectByUserId(Long userId);
+
+    void checkMobile(String mobile);
 }

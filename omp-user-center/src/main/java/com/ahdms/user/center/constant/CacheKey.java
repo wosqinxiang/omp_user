@@ -16,7 +16,10 @@ import java.time.Duration;
 public enum CacheKey implements ICacheKey {
     // ORDER缓存key，失效时间30分钟
     USER("USER", Duration.ofMillis(30)),
-    SMSCODE("SMSCODE", Duration.ofMinutes(3));;
+    USER_ENABLE("USER_ENABLE",Duration.ofHours(24)),
+    USER_LOGIN_ERROR("USER_LOGIN_ERROR_COUNT",Duration.ofHours(24)),
+    PWDTOKEN("USER_PWD_TOKEN",Duration.ofMinutes(10)),
+    SMSCODE("SMSCODE", Duration.ofMinutes(10));
 
     private String prefix;
 

@@ -1,5 +1,6 @@
 package com.ahdms.user.center.utils;
 
+import com.ahdms.framework.core.commom.util.IdGenerateUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 /**
@@ -16,6 +17,10 @@ public class RamdonUtils {
 
     public static String randomString(int count){
         return RandomStringUtils.randomAlphabetic(count);
+    }
+
+    public static String generateId(String idName,String prefix,int length){
+        return IdGenerateUtils.generateId(idName,prefix,length);
     }
 
     public static void main(String[] args){

@@ -1,11 +1,11 @@
 package com.ahdms.user.center.service.impl;
 
 import com.ahdms.framework.mybatis.service.impl.BaseServiceImpl;
+import com.ahdms.user.center.bean.entity.Cities;
 import com.ahdms.user.center.dao.ICitiesDao;
 import com.ahdms.user.center.service.ICitiesService;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.ahdms.user.center.bean.entity.Cities;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

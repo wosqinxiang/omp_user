@@ -1,7 +1,8 @@
 package com.ahdms.user.center.bean.vo;
 
-import lombok.Data;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 /**
  * <B>说明：</B><BR>
  *
@@ -17,6 +18,9 @@ public class UserReqVo  {
 
     @ApiModelProperty("用户名")
     private String username;
+
+    @ApiModelProperty("姓名")
+    private String name;
 
     @ApiModelProperty("手机号码")
     private String mobile;

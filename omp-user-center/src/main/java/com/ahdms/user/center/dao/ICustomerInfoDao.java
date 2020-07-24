@@ -1,12 +1,11 @@
 package com.ahdms.user.center.dao;
 
-import com.ahdms.user.center.bean.bo.CustomerInfoPageRspBo;
-import com.ahdms.user.center.bean.entity.User;
-import com.ahdms.user.center.bean.vo.CustomerInfoPageReqVo;
+import com.ahdms.framework.mybatis.mapper.IMapper;
+import com.ahdms.user.center.bean.bo.CustomerInfoPageBo;
+import com.ahdms.user.center.bean.bo.CustomerPageBo;
+import com.ahdms.user.center.bean.entity.CustomerInfo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Mapper;
-import com.ahdms.framework.mybatis.mapper.IMapper;
-import com.ahdms.user.center.bean.entity.CustomerInfo;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -19,6 +18,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ICustomerInfoDao extends IMapper<CustomerInfo> {
 
-    IPage<CustomerInfoPageRspBo> pageCustomer(@Param("page") IPage<CustomerInfoPageReqVo> page, @Param("customerInfoPageReqVo")CustomerInfoPageReqVo customerInfoPageReqVo);
+    IPage<CustomerInfoPageBo> pageCustomer(@Param("page") IPage<CustomerInfoPageBo> page, @Param("customerInfoPageBo") CustomerPageBo customerInfoPageBo);
 
 }

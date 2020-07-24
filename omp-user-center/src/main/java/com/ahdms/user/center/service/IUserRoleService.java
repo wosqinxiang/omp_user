@@ -12,5 +12,6 @@ import com.ahdms.user.center.bean.entity.UserRole;
  */
 public interface IUserRoleService extends BaseService<UserRole> {
 
+    UserRole selectByUserId(Long userId);
 
 }

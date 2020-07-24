@@ -1,9 +1,9 @@
 package com.ahdms.user.center.bean.vo;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.util.Date;
 
 /**
  * <B>说明：</B><BR>
@@ -77,9 +77,6 @@ public class CompanyBusinessInfoRspVo  {
 
     @ApiModelProperty("信息描述(如 企业认证，商务信息变更)")
     private String infoDesc;
-
-    @ApiModelProperty("")
-    private Date createdAt;
 
     @ApiModelProperty("审核结果")
     private Integer auditResult;

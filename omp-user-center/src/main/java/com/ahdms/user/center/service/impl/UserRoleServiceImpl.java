@@ -1,11 +1,12 @@
 package com.ahdms.user.center.service.impl;
 
 import com.ahdms.framework.mybatis.service.impl.BaseServiceImpl;
+import com.ahdms.user.center.bean.entity.UserRole;
 import com.ahdms.user.center.dao.IUserRoleDao;
 import com.ahdms.user.center.service.IUserRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.ahdms.user.center.bean.entity.UserRole;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -23,5 +24,10 @@ public class UserRoleServiceImpl extends BaseServiceImpl<IUserRoleDao, UserRole>
     @Autowired
     private IUserRoleDao userRoleDao;
 
+    @Override
+    public UserRole selectByUserId(Long userId) {
+
+        return userRoleDao.selectOne(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId,userId));
+    }
 }
 

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/api/customer-product-info")
+@RequestMapping("/api/user/customer/product")
 @Api(" 控制器")
 public class CustomerProductInfoController {
     @Autowired

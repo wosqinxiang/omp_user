@@ -1,9 +1,8 @@
 package com.ahdms.user.center.bean.vo;
 
-import lombok.Data;
-import javax.validation.constraints.NotBlank;
-import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 /**
  * <B>说明：</B><BR>
  *

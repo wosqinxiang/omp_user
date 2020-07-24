@@ -6,7 +6,10 @@ import com.ahdms.user.center.bean.entity.CompanyInfo;
 import com.ahdms.user.center.bean.entity.PayInfo;
 import com.ahdms.user.center.bean.vo.*;
 import com.ahdms.user.center.bo.CompanyInfoPageBo;
+import com.ahdms.user.center.bo.UserPageBo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import java.util.List;
 
 /**
  * <B>说明：服务商管理服务</B><BR>
@@ -17,47 +20,28 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
  */
 public interface ICompanyInfoService extends BaseService<CompanyInfo> {
 
+    IPage pageFWS(FWSCompanyPageReqVo reqVo);
 
-    /**
-     * 分页查询
-     *
-     * @param pageBo
-     * @return
-     */
-    IPage<CompanyInfo> findPage(CompanyInfoPageBo pageBo);
-
-    /**
-     * 修改商户状态
-     *
-     * @param companyId 商户ID
-     * @param status 状态：0启用、1禁用
-     */
-    void updateStatus(Long companyId, Integer status);
-
-    /**
-     * 修改
-  *
-     * @param companyInfo
-     */
-    void update(CompanyInfo companyInfo);
+    IPage pageDLS(DLSCompanyPageReqVo reqVo);
 
     void addFWSCompany(FWSCompanyReqVo reqVo);
 
-    void addGYSCompany(SupplierCompanyReqVo reqVo);
-    void saveCompanyInfo(CompanyBusinessInfo companyBusinessInfo, CompanyInfo companyInfo, PayInfo payInfo);
-
-    void addrelyCompany(String companyName);
-
     void addDLSCompany(DLSCompanyReqVo reqVo);
-
-    void addYLFCompany(YLFCompanyReqVo reqVo);
 
     void updateFWSCompany(FWSCompanyReqVo reqVo);
 
-    void updateGYSCompany(SupplierCompanyReqVo reqVo);
-
     void updateDLSCompany(DLSCompanyReqVo reqVo);
 
-    void updateYLFCompany(YLFCompanyReqVo reqVo);
+    FWSCompanyRspVo fwsInfo(Long companyId);
 
+    DLSCompanyRspVo dlsInfo(Long companyId);
+
+    void fwsStatus(Long companyId, Integer status);
+
+    void dlsStatus(Long companyId, Integer status);
+
+    void audit(AuditInfoReqVo reqVo);
+
+
+    List<CompanySimpleRspVo> listByBinding(Integer bindingStatus);
 }

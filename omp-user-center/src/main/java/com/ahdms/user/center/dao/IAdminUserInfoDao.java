@@ -1,11 +1,13 @@
 package com.ahdms.user.center.dao;
 
+import com.ahdms.framework.mybatis.mapper.IMapper;
+import com.ahdms.user.center.bean.bo.AdminUserInfoBo;
+import com.ahdms.user.center.bean.bo.AdminUserPageQueryBo;
+import com.ahdms.user.center.bean.entity.AdminUserInfo;
 import com.ahdms.user.center.bean.vo.AdminUserInfoPageReqVo;
 import com.ahdms.user.center.bean.vo.AdminUserPageRspVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Mapper;
-import com.ahdms.framework.mybatis.mapper.IMapper;
-import com.ahdms.user.center.bean.entity.AdminUserInfo;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -18,5 +20,5 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface IAdminUserInfoDao extends IMapper<AdminUserInfo> {
 
-    IPage<AdminUserPageRspVo> queryAdminSimple(@Param("page")IPage<AdminUserInfo> page, @Param("pageQueryVo")AdminUserInfoPageReqVo pageQueryVo, @Param("companyId")Long companyId);
+    IPage<AdminUserInfoBo> queryAdminSimple(@Param("page") IPage<AdminUserInfo> page, @Param("pageQueryVo") AdminUserPageQueryBo adminInfoBo , @Param("companyId") Long companyId);
 }

@@ -1,8 +1,8 @@
 package com.ahdms.user.center.bean.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.ahdms.framework.mybatis.core.Entity;
-import com.ahdms.framework.mybatis.annotation.TableBId;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,9 +16,10 @@ import lombok.EqualsAndHashCode;
  */
 @TableName("trade_info")
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class TradeInfo extends Entity {
+public class TradeInfo {
 
+    @TableId
+    private Integer id;
     /**
      * 
      */

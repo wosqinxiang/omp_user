@@ -42,6 +42,7 @@ public class BasicConstant {
 
     public static final Integer COMPANY_AUDIT_WAIT = 1; //商家审核状态 待审核
     public static final Integer COMPANY_AUDIT_OK = 0; //已审核
+    public static final Integer COMPANY_AUDIT_BACK = 2; //未通过
 
     public static final Integer PAYINFO_TYPE_BANK = 1; //银行卡
     public static final Integer PAYINFO_TYPE_ALIPAY = 2; //支付宝支付
@@ -49,15 +50,18 @@ public class BasicConstant {
 
 
     public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";  //超级管理员
-    public static final String ROLE_ZT_ADMIN = "ZT_ADMIN";  //中台管理员
-    public static final String ROLE_ZT_CZY = "ZT_CZY"; //中台操作员
-    public static final String ROLE_ZT_AUDIT = "ZT_AUDIT"; //中台审计员
-    public static final String ROLE_GYS_ADMIN = "GYS_ADMIN"; //供应商管理员
-    public static final String ROLE_GYS_CP_ADMIN = "GYS_CP_ADMIN"; //供应商产品管理员
-    public static final String ROLE_GYS_SQKFY = "GYS_SQKFY"; //售前客服员
+    public static final String ROLE_ZT_ADMIN = "CENTER_ADMIN";  //中台管理员
+    public static final String ROLE_ZT_CZY = "CENTER_OPERATOR"; //中台操作员
+    public static final String ROLE_ZT_AUDIT = "CENTER_AUDITOR"; //中台审计员
+    public static final String ROLE_GYS_ADMIN = "SUPPLIER_ADMIN"; //供应商管理员
+    public static final String ROLE_GYS_CP_ADMIN = "PRODUCT_ADMIN"; //供应商产品管理员
+    public static final String ROLE_GYS_SQKFY = "CUSTOMER_SERVICE"; //售前客服员
     public static final String ROLE_GYS_CW_ADUIT = "GYS_CW_ADUIT"; //财务审计员
-    public static final String ROLE_FWS_ADMIN = "FWS_ADMIN"; //服务商管理员
-    public static final String ROLE_FWS_TGY = "FWS_TGY"; //市场推广员
-    public static final String ROLE_FWS_CW_ADMIN = "FWS_CW_ADMIN"; //财务审计员
+    public static final String ROLE_FWS_ADMIN = "SERVICE_ADMIN"; //服务商管理员
+    public static final String ROLE_FWS_TGY = "MARKET_SALESMAN"; //市场推广员
+    public static final String ROLE_FWS_CW_ADMIN = "FINANCE_AUDITOR"; //财务审计员
     public static final String ROLE_CUSTOMER = "CUSTOMER"; //注册客户
+
+
+
 }

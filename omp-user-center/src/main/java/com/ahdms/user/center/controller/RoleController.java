@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/api/role")
+@RequestMapping("/api/user/role")
 @Api(" 控制器")
 public class RoleController {
     @Autowired

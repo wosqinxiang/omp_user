@@ -3,6 +3,7 @@ package com.ahdms.user.center.controller;
 import com.ahdms.framework.core.commom.page.PageResult;
 import com.ahdms.framework.core.commom.util.PageUtils;
 import com.ahdms.user.center.bean.entity.CompanyInfo;
+import com.ahdms.user.center.bean.vo.CompanyInfoReqVo;
 import com.ahdms.user.center.bean.vo.RelyCompanyPageVo;
 import com.ahdms.user.center.bean.vo.RelyCompanyRspVo;
 import com.ahdms.user.center.service.IRelyCompanyService;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author qinxiang
@@ -38,32 +41,29 @@ public class RelyCompanyController {
         relyCompanyService.addrelyCompany(companyName);
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @ApiOperation(value = "分页查询产品依赖方", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public PageResult<RelyCompanyRspVo> page(@Validated @RequestBody RelyCompanyPageVo company) {
         IPage<CompanyInfo> records = relyCompanyService.page(company);
-        return PageUtils.toPageResult(records,RelyCompanyRspVo.class);
+        return PageUtils.toPageResult(records, RelyCompanyRspVo.class);
     }
 
     @PatchMapping("/update")
-    @ApiOperation(value = "修改产品依赖方", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType="query", name = "companyId", value = "依赖方业务主键", required = true, dataType = "integer"),
-            @ApiImplicitParam(paramType="query", name = "companyName", value = "依赖方名称", required = true, dataType = "String")
-    })
-    public void updateRelyCompany(@Validated @RequestParam Long companyId,@Validated @RequestParam String companyName) {
-        relyCompanyService.updaterelyCompany(companyId,companyName);
+    @ApiOperation(value = "修改产品依赖方", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public void updateRelyCompany(@Validated @RequestBody CompanyInfoReqVo companyInfoReqVo) {
+        relyCompanyService.updaterelyCompany(companyInfoReqVo.getCompanyId(),companyInfoReqVo.getCompanyName());
     }
 
-    @PostMapping("/status")
-    @ApiOperation(value = "启用禁用依赖方", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType="query", name = "companyId", value = "依赖方业务主键", required = true, dataType = "integer(int64)"),
-            @ApiImplicitParam(paramType="query", name = "status", value = "0.启用，1.停用", required = true, dataType = "java.lang.Integer")
-    })
-    public void statusRelyCompany(@Validated @RequestParam Long companyId,@Validated @RequestParam Integer status) {
-        relyCompanyService.statusRelyCompany(companyId,status);
+    @PatchMapping("/status")
+    @ApiOperation(value = "启用禁用依赖方", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public void statusRelyCompany(@Validated @RequestBody CompanyInfoReqVo companyInfoReqVo) {
+        relyCompanyService.statusRelyCompany(companyInfoReqVo.getCompanyId(),companyInfoReqVo.getStatus());
     }
 
+    @PatchMapping("/list")
+    @ApiOperation(value = "获取当前供应商下所有依赖方", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public List<RelyCompanyRspVo> list() {
+        return relyCompanyService.listRelyCom();
+    }
 
 }

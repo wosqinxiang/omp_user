@@ -3,7 +3,6 @@ package com.ahdms.user.center.feign;
 import com.ahdms.framework.core.commom.util.BeanUtils;
 import com.ahdms.framework.core.commom.util.JsonUtils;
 import com.ahdms.user.center.bean.entity.AdminUserInfo;
-import com.ahdms.user.center.bean.entity.CompanyBusinessInfo;
 import com.ahdms.user.center.bean.entity.CompanyInfo;
 import com.ahdms.user.center.bean.entity.PayInfo;
 import com.ahdms.user.center.constant.BasicConstant;
@@ -50,7 +49,7 @@ public class RmiCompanyClientServiceImpl implements CompanyClientService {
         //根据 管理员ID 查询所有的服务商或供应商
         CompanyInfo companyInfo = companyInfoService.getByBId(adminUserInfo.getCompanyId());
 
-        return BeanUtils.copy(companyInfo,CompanyInfoRmiRspVo.class);
+        return BeanUtils.copy(companyInfo, CompanyInfoRmiRspVo.class);
     }
 
     @Override
@@ -62,11 +61,11 @@ public class RmiCompanyClientServiceImpl implements CompanyClientService {
         List<CompanyInfo> records = companyInfoService.list(new QueryWrapper<CompanyInfo>().lambda().
                 eq(CompanyInfo::getCompanyBusinessId,adminUserInfo.getCompanyId())
                 .eq(CompanyInfo::getStatus, BasicConstant.COMPANY_AUDIT_OK));
-        return BeanUtils.copy(records,CompanyInfoRmiRspVo.class);
+        return BeanUtils.copy(records, CompanyInfoRmiRspVo.class);
     }
 
     @Override
-    @GetMapping("getPayInfos")
+    @GetMapping("payInfos/companyId")
     public PayInfoRspVo getPayInfos(@NotNull Long companyId) {
         PayInfoRspVo result = new PayInfoRspVo();
         List<PayInfo> records = payInfoService.list(new LambdaQueryWrapper<PayInfo>().eq(PayInfo::getCompanyInfoId,companyId));
@@ -89,4 +88,29 @@ public class RmiCompanyClientServiceImpl implements CompanyClientService {
         return result;
     }
 
+    @Override
+    @GetMapping("payInfos/companyCode")
+    public PayInfoRspVo getPayInfos(@NotNull String companyCode) {
+        CompanyInfo companyInfo = companyInfoService.getOne(new LambdaQueryWrapper<CompanyInfo>().eq(CompanyInfo::getCompanyCode,companyCode));
+
+        PayInfoRspVo result = new PayInfoRspVo();
+        List<PayInfo> records = payInfoService.list(new LambdaQueryWrapper<PayInfo>().eq(PayInfo::getCompanyInfoId,companyInfo.getCompanyId()));
+        if(records != null && records.size() != 0){
+            for(PayInfo payInfo : records){
+                if(BasicConstant.PAYINFO_TYPE_BANK == payInfo.getType()){
+                    BankInfo bankInfo = JsonUtils.convertValue(payInfo.getPayInfoDesc(),BankInfo.class);
+                    result.setBankInfo(bankInfo);
+                }
+                if(BasicConstant.PAYINFO_TYPE_ALIPAY == payInfo.getType()){
+                    AlipayInfo alipayInfo = JsonUtils.convertValue(payInfo.getPayInfoDesc(), AlipayInfo.class);
+                    result.setAlipayInfo(alipayInfo);
+                }
+                if(BasicConstant.PAYINFO_TYPE_WECHAT == payInfo.getType()){
+                    WechatInfo wechatInfo = JsonUtils.convertValue(payInfo.getPayInfoDesc(), WechatInfo.class);
+                    result.setWechatInfo(wechatInfo);
+                }
+            }
+        }
+        return result;
+    }
 }

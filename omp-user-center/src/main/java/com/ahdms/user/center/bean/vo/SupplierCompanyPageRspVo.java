@@ -2,7 +2,6 @@ package com.ahdms.user.center.bean.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @author qinxiang
@@ -23,9 +22,9 @@ public class SupplierCompanyPageRspVo {
     @ApiModelProperty("企业组织机构代码")
     private String companyBusiCode;
 
-    @ApiModelProperty("供应商状态")
+    @ApiModelProperty("供应商状态(0.正常，1.已禁用)")
     private Integer status;
 
-    @ApiModelProperty("审核状态")
+    @ApiModelProperty("审核状态(0.已审核，1.未审核，2.未通过)")
     private Integer auditStatus;
 }

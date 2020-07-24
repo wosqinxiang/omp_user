@@ -42,51 +42,45 @@ public class UserController {
     @Autowired
     private IUserService userService;
 
-    @PostMapping("/page")
-    @ApiOperation(value = "分页查询", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public PageResult<UserRspVo> page(@RequestBody UserPageReqVo reqVo) {
-        UserPageBo pageBo = BeanUtils.copy(reqVo, UserPageBo.class);
-        IPage<User> userRecords = userService.findPage(pageBo);
-        return PageUtils.toPageResult(userRecords, UserRspVo.class);
-    }
-
-    @GetMapping("/id")
-    @ApiOperation(value = "查看用户信息", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public UserRspVo find(@Validated @NotNull @RequestParam("userId") Long userId) {
-        User user = userService.getByBId(userId);
-        return BeanUtils.copy(user, UserRspVo.class);
-    }
-
-    @PostMapping("/updateStatus")
-    @ApiOperation(value = "更改用户状态", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public void updateStatus(@Validated @NotNull @RequestParam("userId") Long userId,
-                                  @Validated @NotNull @RequestParam("status (0:启用 1:禁用)") Integer status) {
-        userService.updateStatus(userId, status);
-    }
-
-    @PostMapping("/updatePassword")
-    @ApiOperation(value = "更改用户密码", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public void updatePassword(@Validated @NotNull @RequestParam("userId") Long userId,
-                             @Validated @NotNull @RequestParam("password") String password) {
-        userService.updatePassword(userId, password);
-    }
-
-    @PostMapping("/add")
-    @ApiOperation(value = "新增用户", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public void save(@Validated({PostGroup.class}) @RequestBody UserReqVo reqVo) {
-        User user = BeanUtils.copy(reqVo, User.class);
-        UserRole userRole = BeanUtils.copy(reqVo, UserRole.class);
-        AdminUserInfo adminUserInfo = BeanUtils.copy(reqVo, AdminUserInfo.class);
-        userService.saveUser(user, userRole, adminUserInfo);
-    }
-
-    @PostMapping("/updateUser")
-    @ApiOperation(value = "修改用户", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public void update(@Validated({PostGroup.class}) @RequestBody UserReqVo reqVo) {
-        User user = BeanUtils.copy(reqVo, User.class);
-        UserRole userRole = BeanUtils.copy(reqVo, UserRole.class);
-        AdminUserInfo adminUserInfo = BeanUtils.copy(reqVo, AdminUserInfo.class);
-        userService.updateUser(user, userRole, adminUserInfo);
-    }
+//    @PostMapping("/page")
+//    @ApiOperation(value = "分页查询", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    public PageResult<UserRspVo> page(@RequestBody UserPageReqVo reqVo) {
+//        UserPageBo pageBo = BeanUtils.copy(reqVo, UserPageBo.class);
+//        IPage<User> userRecords = userService.findPage(pageBo);
+//        return PageUtils.toPageResult(userRecords, UserRspVo.class);
+//    }
+//
+//    @GetMapping("/id")
+//    @ApiOperation(value = "查看用户信息", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//    public UserRspVo find(@Validated @NotNull @RequestParam("userId") Long userId) {
+//        User user = userService.getByBId(userId);
+//        return BeanUtils.copy(user, UserRspVo.class);
+//    }
+//
+//    @PostMapping("/updateStatus")
+//    @ApiOperation(value = "更改用户状态", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//    public void updateStatus(@Validated @NotNull @RequestParam("userId") Long userId,
+//                                  @Validated @NotNull @RequestParam("status (0:启用 1:禁用)") Integer status) {
+//        userService.updateStatus(userId, status);
+//    }
+//
+//    @PostMapping("/updatePassword")
+//    @ApiOperation(value = "更改用户密码", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//    public void updatePassword(@Validated @NotNull @RequestParam("userId") Long userId,
+//                             @Validated @NotNull @RequestParam("password") String password) {
+//        userService.updatePassword(userId, password);
+//    }
+//
+//    @PostMapping("/add")
+//    @ApiOperation(value = "新增用户", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    public void save(@Validated({PostGroup.class}) @RequestBody UserReqVo userReqVo) {
+//        userService.saveUser(userReqVo);
+//    }
+//
+//    @PostMapping("/updateUser")
+//    @ApiOperation(value = "修改用户", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    public void update(@Validated({PostGroup.class}) @RequestBody UserReqVo userReqVo) {
+//        userService.updateUser(userReqVo);
+//    }
    
 }

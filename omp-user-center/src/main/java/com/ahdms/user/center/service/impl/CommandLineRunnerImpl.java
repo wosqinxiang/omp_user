@@ -13,7 +13,6 @@ import com.ahdms.user.center.service.IUserService;
 import com.ahdms.user.center.utils.MD5Utils;
 import com.ahdms.user.center.utils.UUIDUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +62,10 @@ public class CommandLineRunnerImpl implements CommandLineRunner {
             adminUserInfo.setUserId(user.getUserId());
             adminUserInfoService.save(adminUserInfo);
 
-            Role role = roleService.getOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName,BasicConstant.ROLE_SUPER_ADMIN));
+            Role role = roleService.getOne(new LambdaQueryWrapper<Role>().eq(Role::getRoleName, BasicConstant.ROLE_SUPER_ADMIN));
             UserRole userRole = new UserRole();
             userRole.setRoleName(role.getRoleName());
-            userRole.setRoleId(Integer.parseInt(role.getId()+""));
+            userRole.setRoleId(role.getId());
             userRole.setUserId(user.getUserId());
 
             userRoleService.save(userRole);

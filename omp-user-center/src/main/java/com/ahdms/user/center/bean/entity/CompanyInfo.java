@@ -1,10 +1,10 @@
 package com.ahdms.user.center.bean.entity;
 
+import com.ahdms.framework.mybatis.annotation.TableBId;
+import com.ahdms.framework.mybatis.core.Entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.ahdms.framework.mybatis.core.Entity;
-import com.ahdms.framework.mybatis.annotation.TableBId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

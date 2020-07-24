@@ -2,7 +2,7 @@ package com.ahdms.user.center.service.impl;
 
 import com.ahdms.framework.cache.client.RedisOpsClient;
 import com.ahdms.framework.core.commom.util.BeanUtils;
-import com.ahdms.framework.core.commom.util.DigestUtils;
+import com.ahdms.framework.core.commom.util.ObjectUtils;
 import com.ahdms.framework.core.commom.util.OmpContextUtils;
 import com.ahdms.framework.core.commom.util.StringUtils;
 import com.ahdms.framework.core.web.response.ResultAssert;
@@ -10,8 +10,10 @@ import com.ahdms.framework.mybatis.service.impl.BaseServiceImpl;
 import com.ahdms.user.center.bean.bo.*;
 import com.ahdms.user.center.bean.entity.*;
 import com.ahdms.user.center.bean.vo.CustomerInfoPageReqVo;
+import com.ahdms.user.center.bean.vo.MobileSmsCodeVo;
 import com.ahdms.user.center.code.ApiCode;
 import com.ahdms.user.center.constant.BasicConstant;
+import com.ahdms.user.center.constant.CacheKey;
 import com.ahdms.user.center.dao.ICustomerInfoDao;
 import com.ahdms.user.center.service.*;
 import com.ahdms.user.center.utils.MD5Utils;
@@ -20,15 +22,17 @@ import com.ahdms.user.center.utils.UUIDUtils;
 import com.ahdms.user.center.utils.ValidateUtils;
 import com.ahdms.user.client.vo.CustomerBasicInfoRspVo;
 import com.ahdms.user.client.vo.UserLoginRspVo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static com.ahdms.user.center.constant.CacheKey.PWDTOKEN;
 import static com.ahdms.user.center.constant.CacheKey.SMSCODE;
 
 /**
@@ -65,10 +69,18 @@ public class CustomerInfoServiceImpl extends BaseServiceImpl<ICustomerInfoDao, C
     private IAuditInfoService auditInfoService;
 
     @Override
-    public CustomerBasicInfoRspVo getCustomerBasicInfo(Long userId) {
+    public CustomerDetailBo getCustomerBasicInfo(Long userId) {
         User user = userService.getByBId(userId);
-        CustomerInfo customerInfo = super.getOne(new QueryWrapper<CustomerInfo>().lambda().eq(CustomerInfo::getUserId, userId));
-        CustomerBasicInfoRspVo customerBasicInfoRspVo = BeanUtils.copy(user,CustomerBasicInfoRspVo.class);
+
+        CustomerInfo customerInfo = this.selectByUserId(userId);
+        CustomerDetailBo customerBasicInfoRspVo = BeanUtils.copy(user, CustomerDetailBo.class);
+        if (StringUtils.isBlank(user.getPassword())) {
+            customerBasicInfoRspVo.setPwdStatus("0");
+        } else  {
+            customerBasicInfoRspVo.setPwdStatus("1");
+        }
+        UserRole userRole = userRoleService.getOne(new QueryWrapper<UserRole>().lambda().eq(UserRole::getUserId, user.getUserId()));
+        customerBasicInfoRspVo.setRoleName(userRole.getRoleName());
         BeanUtils.copy(customerInfo,customerBasicInfoRspVo);
         return customerBasicInfoRspVo;
     }
@@ -76,7 +88,7 @@ public class CustomerInfoServiceImpl extends BaseServiceImpl<ICustomerInfoDao, C
     @Override
     public String sendSmsCode(String mobile) {
         //校验手机号
-        ResultAssert.throwOnFalse(ValidateUtils.validateMobile(mobile),ApiCode.USER_MOBILE_FORMAT_ERROR);
+        ResultAssert.throwOnFalse(ValidateUtils.validateMobile(mobile), ApiCode.USER_MOBILE_FORMAT_ERROR);
 
         String smsCode = RamdonUtils.randomNumeric(6);
         //发送短信
@@ -93,41 +105,59 @@ public class CustomerInfoServiceImpl extends BaseServiceImpl<ICustomerInfoDao, C
     }
 
     @Override
-    public void resetPassword(String newPwd) {
-        Long userId = OmpContextUtils.getUserId();
-        User user = userService.getByBId(userId);
+    @Transactional
+    public void resetPassword(MobileSmsCodeVo mobileVo) {
+        //验证pwdToken，判断是否是手机验证码验证通过的手机号
+        String _pwdToken = redisOpsClient.getStr(PWDTOKEN.getKey(mobileVo.getMobile()));
+        ResultAssert.throwOnFalse(StringUtils.isNotBlank(_pwdToken) && _pwdToken.equals(mobileVo.getPwdToken()), ApiCode.USER_PWD_RESET_ERROR);
+        //验证通过后，更新密码
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getMobile,mobileVo.getMobile()));
         String salt = user.getSalt();
-        user.setPassword(MD5Utils.md5WithSalt(newPwd,salt));
-
+        user.setPassword(MD5Utils.md5WithSalt(mobileVo.getPassword(),salt));
         userService.updateByBId(user);
+        redisOpsClient.del(PWDTOKEN.getKey(mobileVo.getMobile()));
     }
 
     @Override
-    public void backPassword(String mobile, String smsCode) {
-        User user = userService.getByBId(OmpContextUtils.getUserId());
-
-        ResultAssert.throwOnFalse(mobile.equals(user.getMobile()), ApiCode.USER_MOBILE_MATCH);
-
-        checkSmsCode(mobile,smsCode);
+    public MobileSmsCodeBo backPassword(MobileSmsCodeBo mobileSmsCodeBo) {
+        //判断手机号是否已注册
+        checkMobile(mobileSmsCodeBo.getMobile());
+        //校验验证码
+        checkSmsCode(mobileSmsCodeBo.getMobile(),mobileSmsCodeBo.getSmsCode());
+        //生成重置密码的token
+        String pwdToken = RamdonUtils.randomString(8);
+        //将token存入redis中
+        redisOpsClient.setex(CacheKey.PWDTOKEN.getKey(mobileSmsCodeBo.getMobile()),pwdToken,CacheKey.PWDTOKEN.getExpire().getSeconds());
+        //将token返回给前端
+        mobileSmsCodeBo.setPwdToken(pwdToken);
+        mobileSmsCodeBo.setSmsCode(null);
+        return mobileSmsCodeBo;
     }
 
     @Override
     public UserLoginRspVo register(String mobile, String smsCode) {
-        User _user = userService.getOne(new QueryWrapper<User>().lambda().eq(User::getMobile,mobile));
-        ResultAssert.throwOnFalse(_user == null, ApiCode.USER_MOBILE_REPEAT);
+        checkMobile(mobile);
 
-        String _smsCode = redisOpsClient.getStr(SMSCODE.getKey(mobile));
-        ResultAssert.throwOnFalse(smsCode.equals(_smsCode), ApiCode.USER_SMSCODE_ERROR);
+        checkSmsCode(mobile,smsCode);
+
         User user = new User();
         user.setMobile(mobile);
         user.setEnabled(BasicConstant.STATUS_ON);
         userService.save(user);
-        Role role = roleService.getOne(new QueryWrapper<Role>().lambda().eq(Role::getRoleName,BasicConstant.ROLE_CUSTOMER));
+
+        Role role = roleService.selectByRoleName(BasicConstant.ROLE_CUSTOMER);
         UserRole userRole = new UserRole();
-        userRole.setRoleId(Integer.parseInt(role.getId()+""));
+        userRole.setRoleId(role.getId());
         userRole.setRoleName(BasicConstant.ROLE_CUSTOMER);
         userRole.setUserId(user.getUserId());
         userRoleService.save(userRole);
+
+        CustomerInfo customerInfo = new CustomerInfo();
+        customerInfo.setUserId(user.getUserId());
+        customerInfo.setAuditStatus(BasicConstant.CUSTOM_AUDIT_STATUS_NO); //  审核状态
+        customerInfo.setAuthStatus(BasicConstant.CUSTOM_AUTH_STATUS_NO);  // 企业认证状态
+        super.save(customerInfo);
+
 
         UserLoginRspVo result = new UserLoginRspVo();
         result.setRole(BasicConstant.ROLE_CUSTOMER);
@@ -138,16 +168,14 @@ public class CustomerInfoServiceImpl extends BaseServiceImpl<ICustomerInfoDao, C
 
     @Override
     public void updateMobile(String mobile, String smsCode) {
-        User _user = userService.getOne(new QueryWrapper<User>().lambda().eq(User::getMobile,mobile));
-        ResultAssert.throwOnFalse(_user == null, ApiCode.USER_EMAIL_REPEAT);
+        ResultAssert.throwOnFalse(ObjectUtils.isNotEmpty(userService.selectByMobile(mobile)), ApiCode.USER_MOBILE_REPEAT);
 
-        String _smsCode = redisOpsClient.getStr(SMSCODE.getKey(mobile));
-        ResultAssert.throwOnFalse(smsCode.equals(_smsCode), ApiCode.USER_SMSCODE_ERROR);
+        this.checkSmsCode(mobile,smsCode);
 
-        Long userId = OmpContextUtils.getUserId();
-        User user = userService.getByBId(userId);
+        User user = userService.getByBId(OmpContextUtils.getUserId());
         user.setMobile(mobile);
         userService.updateByBId(user);
+//        userService.update(new LambdaQueryWrapper<User>().eq(User::getUserId,OmpContextUtils.getUserId())
 
     }
 
@@ -161,77 +189,73 @@ public class CustomerInfoServiceImpl extends BaseServiceImpl<ICustomerInfoDao, C
     }
 
     @Override
+    public void checkMobile(String mobile) {
+        ResultAssert.throwOnFalse(ValidateUtils.validateMobile(mobile), ApiCode.USER_NAME_FORMAT_ERROR);
+        ResultAssert.throwOnFalse(ObjectUtils.isNotEmpty(userService.selectByMobile(mobile)), ApiCode.USER_NAME_REPEAT);
+    }
+
+    @Override
     public void checkUsername(String username) {
         //校验用户名格式
-        ResultAssert.throwOnFalse(ValidateUtils.validateUsername(username),ApiCode.USER_NAME_FORMAT_ERROR);
-        User user = userService.getOne(new QueryWrapper<User>().lambda().eq(User::getUsername,username));
-        ResultAssert.throwOnFalse(user == null, ApiCode.USER_NAME_REPEAT);
+        ResultAssert.throwOnFalse(ValidateUtils.validateUsername(username), ApiCode.USER_NAME_FORMAT_ERROR);
+        ResultAssert.throwOnFalse(ObjectUtils.isNotEmpty(userService.selectByUsername(username)), ApiCode.USER_NAME_REPEAT);
     }
 
     @Override
     public void updatePassword(String newPwd, String oldPwd) {
         //判断原密码是否正确
-        Long userId = OmpContextUtils.getUserId();
-        User user = userService.getByBId(userId);
+        User user = userService.getByBId(OmpContextUtils.getUserId());
 
         String salt = user.getSalt();
         String pwd = MD5Utils.md5WithSalt(oldPwd,salt);
         ResultAssert.throwOnFalse(pwd.equals(user.getPassword()), ApiCode.USER_PWD_ERROR);
 
         user.setPassword(MD5Utils.md5WithSalt(newPwd,salt));
-
         userService.updateByBId(user);
 
     }
 
     @Override
-    public void setBasicInfo(CustomerInfoReqBo customerInfoReqBo) {
-        checkUsername(customerInfoReqBo.getUsername());
-        checkEmail(customerInfoReqBo.getEmail());
+    @Transactional
+    public void setBasicInfo(CustomerInfoBasicBo customerInfoBo) {
+        checkUsername(customerInfoBo.getUsername());
+        checkEmail(customerInfoBo.getEmail());
 
         Long userId = OmpContextUtils.getUserId();
-
-        User user = BeanUtils.copy(customerInfoReqBo, User.class);
-        user.setUserId(userId);
+        User user = userService.getByBId(userId);
+        user.setUsername(customerInfoBo.getUsername());
+        user.setEmail(customerInfoBo.getEmail());
         String salt = UUIDUtils.getUUID();
         user.setSalt(salt);
         user.setPassword(MD5Utils.md5WithSalt(user.getPassword(),salt));
-        CustomerInfo customerInfo = new CustomerInfo();
-        customerInfo.setUserId(user.getUserId());
+
+        CustomerInfo customerInfo = this.selectByUserId(userId);
         customerInfo.setAuditStatus(BasicConstant.CUSTOM_AUDIT_STATUS_NO); //  审核状态
         customerInfo.setAuthStatus(BasicConstant.CUSTOM_AUTH_STATUS_NO);  // 企业认证状态
 
         userService.updateByBId(user);
 
-        super.save(customerInfo);
+        super.updateByBId(customerInfo);
     }
 
     @Override
-    public IPage<CustomerInfoPageRspBo> pageCustomer(CustomerInfoPageReqVo customerInfoPageReqVo) {
-
-//        LambdaQueryWrapper wrapper = Wrappers.<User>lambdaQuery()
-//                // 用户名不为空时根据用户名右模糊查询
-//                // 慎用全模糊，索引字段全模糊会导致索引失效
-//                .like(StringUtils.isNotBlank(customerInfoPageReqVo.getUsername()), User::getUsername, customerInfoPageReqVo.getUsername())
-//                .like(StringUtils.isNotBlank(customerInfoPageReqVo.getMobile()), User::getMobile, customerInfoPageReqVo.getMobile())
-//                .like(StringUtils.isNotBlank(customerInfoPageReqVo.getCompanyName()), User::getMobile, customerInfoPageReqVo.getCompanyName())
-//                // 根据创建时间倒序
-//                .orderByDesc(User::getCreatedAt);
+    public IPage<CustomerInfoPageBo> pageCustomer(CustomerPageBo customerPageBo) {
 
         // 设置分页参数
-        IPage<CustomerInfoPageReqVo> page = new Page<>(customerInfoPageReqVo.getPageNum(), customerInfoPageReqVo.getPageSize());
+        IPage<CustomerInfoPageBo> page = new Page<>(customerPageBo.getPageNum(), customerPageBo.getPageSize());
 
-        IPage<CustomerInfoPageRspBo> page1 = customerInfoDao.pageCustomer(page,customerInfoPageReqVo);
+        IPage<CustomerInfoPageBo> page1 = customerInfoDao.pageCustomer(page,customerPageBo);
 
-//        IPage<User> p = userService.page(page,wrapper);
-//        List<CustomerInfoPageRspBo> list = BeanUtils.copy(p.getRecords(),CustomerInfoPageRspBo.class);
-//        System.out.println(">>>>>>>"+list);
         return page1;
     }
 
-
-
-
+    @Override
+    public CustomerInfo selectByUserId(Long userId) {
+        if(userId == null){
+            userId = OmpContextUtils.getUserId();
+        }
+        return customerInfoDao.selectOne(new LambdaQueryWrapper<CustomerInfo>().eq(CustomerInfo::getUserId,userId));
+    }
 
     private CustomerInfo getCustomerInfo(String customerId){
         CustomerInfo customerInfo = null;

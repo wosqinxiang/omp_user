@@ -16,6 +16,4 @@ public class YLFCompanyReqVo {
     @ApiModelProperty("名称")
     private String companyName;
 
-    @ApiModelProperty("类型(1.服务商、2.供应商、3.代理商, 4.产品依赖服务方)")
-    private Integer type;
 }

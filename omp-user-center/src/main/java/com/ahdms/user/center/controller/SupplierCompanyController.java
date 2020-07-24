@@ -32,11 +32,12 @@ public class SupplierCompanyController {
 
     @PostMapping("/add")
     @ApiOperation(value = "添加供应商", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    @OperLog(operModul = "用户中心", operDesc = "新增供应商")
     public void addGYSCompany(@Validated @RequestBody SupplierCompanyReqVo reqVo) {
         relyCompanyService.addGYSCompany(reqVo);
     }
 
-    @PostMapping("/info")
+    @GetMapping("/info")
     @ApiOperation(value = "查看供应商详情", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ApiImplicitParam(paramType="query", name = "companyId", value = "供应商业务主键", required = true, dataType = "integer")
     public SupplierCompanyRspVo info(@Validated @RequestParam Long companyId) {
@@ -52,18 +53,16 @@ public class SupplierCompanyController {
 
     @PatchMapping("/update")
     @ApiOperation(value = "修改供应商", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    @OperLog(operModul = "用户中心", operDesc = "修改供应商")
     public void update(@Validated @RequestBody SupplierCompanyReqVo reqVo) {
         relyCompanyService.updateGYS(reqVo);
     }
 
-    @PostMapping("/status")
-    @ApiOperation(value = "停用启用供应商", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType="query", name = "companyId", value = "供应商业务主键", required = true, dataType = "integer"),
-            @ApiImplicitParam(paramType="query", name = "status", value = "0.启用，1.停用", required = true, dataType = "integer")
-    })
-    public void status(@Validated @RequestParam Long companyId,@Validated @RequestParam Integer status) {
-        relyCompanyService.gysStatus(companyId,status);
+    @PatchMapping("/status")
+    @ApiOperation(value = "停用启用供应商", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//    @OperLog(operModul = "用户中心", operDesc = "停用/启用供应商")
+    public void status(@Validated @RequestBody CompanyInfoReqVo companyInfoReqVo) {
+        relyCompanyService.gysStatus(companyInfoReqVo.getCompanyId(),companyInfoReqVo.getStatus());
     }
 
     @PostMapping("/audit")

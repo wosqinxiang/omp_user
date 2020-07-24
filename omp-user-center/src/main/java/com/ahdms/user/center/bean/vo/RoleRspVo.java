@@ -1,9 +1,7 @@
 package com.ahdms.user.center.bean.vo;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * <B>说明：</B><BR>

@@ -19,4 +19,8 @@ public interface IRoleService extends BaseService<Role> {
     List<RoleRspVo> roleList();
 
     List<RoleRspVo> allList();
+
+    Role selectByIdAndParentId(Long id,Long parentId);
+
+    Role selectByRoleName(String roleName);
 }

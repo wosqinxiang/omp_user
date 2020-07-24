@@ -1,7 +1,6 @@
 package com.ahdms.user.center.service.impl;
 
 import com.ahdms.framework.core.commom.util.BeanUtils;
-import com.ahdms.framework.core.commom.util.ObjectUtils;
 import com.ahdms.framework.core.commom.util.OmpContextUtils;
 import com.ahdms.framework.core.commom.util.StringUtils;
 import com.ahdms.framework.core.web.response.ResultAssert;
@@ -10,11 +9,11 @@ import com.ahdms.user.center.bean.bo.AuditInfoReqBo;
 import com.ahdms.user.center.bean.bo.ComBusiRecordRspBo;
 import com.ahdms.user.center.bean.bo.CompanyBusinessReqBo;
 import com.ahdms.user.center.bean.entity.AuditInfo;
+import com.ahdms.user.center.bean.entity.CompanyBusinessInfo;
 import com.ahdms.user.center.bean.entity.CustomerInfo;
 import com.ahdms.user.center.bean.entity.User;
 import com.ahdms.user.center.bean.vo.CompanyBusinessInfoRspVo;
 import com.ahdms.user.center.bean.vo.CustomerComBusiRspVo;
-import com.ahdms.user.center.bo.CompanyBusinessInfoPageBo;
 import com.ahdms.user.center.code.ApiCode;
 import com.ahdms.user.center.constant.BasicConstant;
 import com.ahdms.user.center.dao.ICompanyBusinessInfoDao;
@@ -25,13 +24,8 @@ import com.ahdms.user.center.service.ICustomerInfoService;
 import com.ahdms.user.center.service.IUserService;
 import com.ahdms.user.center.utils.RamdonUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.ahdms.user.center.bean.entity.CompanyBusinessInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -72,20 +66,26 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
         //获取登录客户信息
         CustomerInfo customerInfo = getCustomerInfo(customerId);
         User user = userService.getByBId(customerInfo.getUserId());
-        CompanyBusinessInfoRspVo vo = BeanUtils.copy(user,CompanyBusinessInfoRspVo.class);
+        CompanyBusinessInfoRspVo vo = BeanUtils.copy(user, CompanyBusinessInfoRspVo.class);
         //根据认证状态 返回 企业商务信息表数据
         Integer authStatus = customerInfo.getAuthStatus();
 
         //返回最近的一条企业商务信息记录
         List<CompanyBusinessInfo> list = super.list(new QueryWrapper<CompanyBusinessInfo>().lambda()
-                .eq(CompanyBusinessInfo::getCustomerId,customerInfo.getCustomerId())
+                .eq(CompanyBusinessInfo::getCustomerId, customerInfo.getCustomerId())
                 .orderByDesc(CompanyBusinessInfo::getCreatedAt));
-        CompanyBusinessInfo cbi = (list == null || list.size() ==0 ) ? new CompanyBusinessInfo() : list.get(0);
+        // TODO 变量命名不规范，使用言简意赅的单词来声明
+        /**
+         *  TODO 建议：CompanyBusinessInfo businessInfo = Optional.ofNullable(list).orElse(Collections.emptyList())
+         *                 .stream().findFirst().orElse(new CompanyBusinessInfo());
+         */
+        CompanyBusinessInfo cbi = (list == null || list.size() == 0) ? new CompanyBusinessInfo() : list.get(0);
         AuditInfo auditInfo = auditInfoService.getByBId(cbi.getAuditId());
 
-        BeanUtils.copy(cbi,vo);
-        if(auditInfo != null)
-            BeanUtils.copy(auditInfo,vo);
+        BeanUtils.copy(cbi, vo);
+        // TODO if 加上{}，提高可读性
+        if (auditInfo != null)
+            BeanUtils.copy(auditInfo, vo);
         vo.setAuthStatus(authStatus);
         return vo;
 
@@ -138,16 +138,18 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
         CustomerInfo customerInfo = getCustomerInfo(customerId);
 
         //根据客户ID查询所有的 企业商务信息
-        List<CompanyBusinessInfo> list = super.list(new QueryWrapper<CompanyBusinessInfo>().lambda().eq(CompanyBusinessInfo::getCustomerId,customerInfo.getCustomerId()).orderByDesc(CompanyBusinessInfo::getCreatedAt));
+        // TODO 注意命名规范，代码分行提高可读性
+        List<CompanyBusinessInfo> list = super.list(new QueryWrapper<CompanyBusinessInfo>().lambda().eq(CompanyBusinessInfo::getCustomerId, customerInfo.getCustomerId()).orderByDesc(CompanyBusinessInfo::getCreatedAt));
 
         List<ComBusiRecordRspBo> records = new ArrayList<>();
-        for (CompanyBusinessInfo cbInfo:list) {
+        for (CompanyBusinessInfo cbInfo : list) {
+            // TODO BO没有Req和Resp的区分
             ComBusiRecordRspBo bo = new ComBusiRecordRspBo();
 
             Long auditId = cbInfo.getAuditId();
             AuditInfo auditInfo = auditInfoService.getByBId(auditId);
-
-            if(null != auditId){
+            // TODO 使用枚举来对字典类型进行翻译，避免代码中定义魔法值，此处判断逻辑不应该是auditInfo != null，避免空指针？
+            if (null != auditId) {
                 bo.setAuditResult(0 == auditInfo.getAuditResult() ? "通过" : "退回");
                 bo.setAudit_at(auditInfo.getCreatedAt());
             }
@@ -157,6 +159,29 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
 
             records.add(bo);
         }
+        // TODO 参考：
+//        List<CompanyBusinessInfo> businessInfos = super.list(new QueryWrapper<CompanyBusinessInfo>().lambda().eq(CompanyBusinessInfo::getCustomerId, customerInfo.getCustomerId()).orderByDesc(CompanyBusinessInfo::getCreatedAt));
+//        if (CollectionUtils.isEmpty(businessInfos)) {
+//            return Collections.emptyList();
+//        }
+//
+//        // 避免循环查询数据库程序进行数据组装
+//        Set<Long> auditIds = businessInfos.stream().map(CompanyBusinessInfo::getAuditId)
+//                .collect(Collectors.toSet());
+//        List<AuditInfo> auditInfos = auditInfoService.getBatchBIds(auditIds);
+//        Map<Long, AuditInfo> auditInfoMap = Optional.ofNullable(auditInfos).orElse(Collections.emptyList())
+//                .stream().collect(Collectors.toMap(AuditInfo::getAuditId, Function.identity()));
+//
+//
+//        return businessInfos.stream().map(businessInfo -> {
+//            ComBusiRecordRspBo recordBo = BeanUtils.copy(businessInfo, ComBusiRecordRspBo.class);
+//            Optional.ofNullable(auditInfoMap.get(businessInfo.getAuditId()))
+//                    .ifPresent(auditInfo -> {
+//                        recordBo.setAuditResult(0 == auditInfo.getAuditResult() ? "通过" : "退回");
+//                        recordBo.setAudit_at(auditInfo.getCreatedAt());
+//                    });
+//            return recordBo;
+//        }).collect(Collectors.toList());
 
         return records;
     }
@@ -165,7 +190,7 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
     public CompanyBusinessInfoRspVo getCompanyBussRecord(String comBusId) {
         CompanyBusinessInfo companyBusinessInfo = super.getByBId(comBusId);
 
-        return BeanUtils.copy(companyBusinessInfo,CompanyBusinessInfoRspVo.class);
+        return BeanUtils.copy(companyBusinessInfo, CompanyBusinessInfoRspVo.class);
     }
 
 
@@ -176,16 +201,16 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
         User user = userService.getByBId(customerInfo.getUserId());
 
         CompanyBusinessInfo companyBusinessInfo = super.getOne(new QueryWrapper<CompanyBusinessInfo>().lambda()
-                .eq(CompanyBusinessInfo::getCustomerId,customerInfo.getCustomerId())
-                .eq(CompanyBusinessInfo::getStatus,0));
+                .eq(CompanyBusinessInfo::getCustomerId, customerInfo.getCustomerId())
+                .eq(CompanyBusinessInfo::getStatus, 0));
 
-        CustomerComBusiRspVo customerComBusiRspVo = BeanUtils.copy(customerInfo,CustomerComBusiRspVo.class);
-        BeanUtils.copy(user,customerComBusiRspVo);
-        BeanUtils.copy(companyBusinessInfo,customerComBusiRspVo);
+        CustomerComBusiRspVo customerComBusiRspVo = BeanUtils.copy(customerInfo, CustomerComBusiRspVo.class);
+        BeanUtils.copy(user, customerComBusiRspVo);
+        BeanUtils.copy(companyBusinessInfo, customerComBusiRspVo);
 
         AuditInfo auditInfo = auditInfoService.getByBId(companyBusinessInfo.getAuditId());
-        if(auditInfo != null){
-            BeanUtils.copy(auditInfo,customerComBusiRspVo);
+        if (auditInfo != null) {
+            BeanUtils.copy(auditInfo, customerComBusiRspVo);
         }
         return customerComBusiRspVo;
     }
@@ -198,7 +223,7 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
         String infoDesc = BasicConstant.AUDIT_TYPE_AUTH == auditType ? "企业认证" : "企业商务信息变更";
 
         //添加一条审核记录
-        AuditInfo auditInfo = BeanUtils.copy(auditInfoReqBo,AuditInfo.class);
+        AuditInfo auditInfo = BeanUtils.copy(auditInfoReqBo, AuditInfo.class);
         auditInfo.setAuditType(auditType); //设置认证类型
         auditInfoService.save(auditInfo);
 
@@ -206,7 +231,8 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
         String comBusId = auditInfoReqBo.getAuditInfo();
         CompanyBusinessInfo companyBusinessInfo = super.getByBId(comBusId);
         CustomerInfo customerInfo = customerInfoService.getByBId(companyBusinessInfo.getCustomerId());
-        if(0 == auditResult){ //审核通过
+        // TODO 针对审核通过和审核不通过单独另起一个方法，是主方法内只保留主干逻辑，提高代码的可读性
+        if (0 == auditResult) { //审核通过
             companyBusinessInfo.setInfoDesc(infoDesc);
             companyBusinessInfo.setAuditId(auditInfo.getAuditId());
             companyBusinessInfo.setStatus(BasicConstant.COM_BUS_STATUS_ON); //根据认证结果 修改企业商务信息状态
@@ -216,14 +242,14 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
             customerInfo.setAuthStatus(BasicConstant.CUSTOM_AUTH_STATUS_OK); //已认证
             //如果是企业认证,认证通过  产生 服务权限信息ID 与 服务权限信息KEY
 //            if(BasicConstant.AUDIT_TYPE_AUTH == auditType){
-                if(StringUtils.isAnyBlank(customerInfo.getSecretId(),customerInfo.getSecretKey())){
-                    customerInfo.setSecretId(RamdonUtils.randomString(8));
-                    customerInfo.setSecretKey(RamdonUtils.randomString(8));
-                    //发送消息到 kafka, 推送 客户数据 到 对接中心
-                    mqProducerSend.send();
-                }
+            if (StringUtils.isAnyBlank(customerInfo.getSecretId(), customerInfo.getSecretKey())) {
+                customerInfo.setSecretId(RamdonUtils.randomString(8));
+                customerInfo.setSecretKey(RamdonUtils.randomString(8));
+            }
+            //发送消息到 kafka, 推送 客户数据 到 对接中心
+            mqProducerSend.pushCustomerInfo(customerInfo);
 //            }
-        }else{
+        } else {
             companyBusinessInfo.setInfoDesc(infoDesc);
             companyBusinessInfo.setAuditId(auditInfo.getAuditId());
             companyBusinessInfo.setStatus(BasicConstant.COM_BUS_STATUS_OFF); //根据认证结果 修改企业商务信息状态 已作废
@@ -237,8 +263,8 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
 
     }
 
-    private void saveCompanyBussiness(CompanyBusinessReqBo companyBusinessReqBo, int type){
-        CustomerInfo customerInfo =getCustomerInfo(null);
+    private void saveCompanyBussiness(CompanyBusinessReqBo companyBusinessReqBo, int type) {
+        CustomerInfo customerInfo = getCustomerInfo(null);
 
         CompanyBusinessInfo companyBusinessInfo = BeanUtils.copy(companyBusinessReqBo, CompanyBusinessInfo.class);
         companyBusinessInfo.setCustomerId(customerInfo.getCustomerId());
@@ -253,15 +279,22 @@ public class CompanyBusinessInfoServiceImpl extends BaseServiceImpl<ICompanyBusi
         super.save(companyBusinessInfo);
     }
 
-    private CustomerInfo getCustomerInfo(String customerId){
+    private CustomerInfo getCustomerInfo(String customerId) {
         CustomerInfo customerInfo = null;
-        if(StringUtils.isBlank(customerId)){
+        if (StringUtils.isBlank(customerId)) {
             Long userId = OmpContextUtils.getUserId();
             customerInfo = customerInfoService.getOne(new QueryWrapper<CustomerInfo>().lambda().eq(CustomerInfo::getUserId, userId));
-        }else{
+        } else {
             customerInfo = customerInfoService.getByBId(customerId);
         }
         return customerInfo;
+        // TODO 建议
+//        if (StringUtils.isNotBlank(customerId)) {
+//            return customerInfoService.getByBId(customerId);
+//        }
+//        Long userId = OmpContextUtils.getUserId();
+//        return customerInfoService.getOne(new QueryWrapper<CustomerInfo>().lambda()
+//                .eq(CustomerInfo::getUserId, userId));
     }
 }
 

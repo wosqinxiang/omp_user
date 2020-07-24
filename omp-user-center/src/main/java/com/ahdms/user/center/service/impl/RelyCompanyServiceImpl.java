@@ -2,12 +2,15 @@ package com.ahdms.user.center.service.impl;
 
 import com.ahdms.framework.core.commom.util.*;
 import com.ahdms.framework.core.web.response.ResultAssert;
+import com.ahdms.product.client.ProductInfoClientService;
 import com.ahdms.user.center.bean.entity.*;
 import com.ahdms.user.center.bean.vo.*;
 import com.ahdms.user.center.code.ApiCode;
 import com.ahdms.user.center.constant.BasicConstant;
 import com.ahdms.user.center.dao.ICompanyInfoDao;
+import com.ahdms.user.center.message.MQProducerSend;
 import com.ahdms.user.center.service.*;
+import com.ahdms.user.center.utils.IdGenerUtils;
 import com.ahdms.user.center.utils.RamdonUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -52,6 +55,15 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
     @Autowired
     private IRoleService roleService;
 
+    @Autowired
+    private ProductInfoClientService productInfoClientService;
+
+    @Autowired
+    private MQProducerSend mqProducerSend;
+
+    @Autowired
+    private IdGenerUtils idGenerUtils;
+
     @Override
     public void addrelyCompany(String companyName) {
         //新增产品依赖方
@@ -60,7 +72,7 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
                 eq(AdminUserInfo::getUserId, OmpContextUtils.getUserId()));
 
         CompanyInfo companyInfo = new CompanyInfo();
-        companyInfo.setCompanyCode("YLF"+ RamdonUtils.randomNumeric(4));//依赖方编码
+        companyInfo.setCompanyCode(idGenerUtils.generateId(idGenerUtils.getYlfIdName()));//依赖方编码
         companyInfo.setCompanyName(companyName);
         companyInfo.setType(BasicConstant.COMPANY_TYPE_YLF);
         companyInfo.setCompanyBusinessId(loginAdmin.getCompanyId()); //依赖方所属 供应商ID
@@ -73,10 +85,10 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
     public IPage<CompanyInfo> page(RelyCompanyPageVo company) {
         //根据登录人 查询 对应的依赖方
         AdminUserInfo adminUserInfo = adminUserInfoService.getOne(new LambdaQueryWrapper<AdminUserInfo>()
-                .eq(AdminUserInfo::getUserId,OmpContextUtils.getUserId()));
+                .eq(AdminUserInfo::getUserId, OmpContextUtils.getUserId()));
 
         LambdaQueryWrapper wrapper = Wrappers.<CompanyInfo>lambdaQuery()
-                .eq(CompanyInfo::getType,BasicConstant.COMPANY_TYPE_YLF)
+                .eq(CompanyInfo::getType, BasicConstant.COMPANY_TYPE_YLF)
                 .eq(CompanyInfo::getCompanyBusinessId,adminUserInfo.getCompanyId())
                 .likeRight(StringUtils.isNotBlank(company.getCompanyName()), CompanyInfo::getCompanyName, company.getCompanyName());
         // 设置分页参数
@@ -115,13 +127,14 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
     @Transactional
     public void addGYSCompany(SupplierCompanyReqVo supplierCompanyReqVo) {
         //添加信息至CompanyInfo表
-        CompanyInfo companyInfo = BeanUtils.copy(supplierCompanyReqVo,CompanyInfo.class);
+        CompanyInfo companyInfo = BeanUtils.copy(supplierCompanyReqVo, CompanyInfo.class);
 //        companyInfo.setCompanyBusinessId(companyBusinessInfo.getComBusinessId());
         companyInfo.setType(BasicConstant.COMPANY_TYPE_GYX); //类型为供应商
         companyInfo.setAuditStatus(BasicConstant.COMPANY_AUDIT_WAIT);//待审核状态
         companyInfo.setStatus(BasicConstant.STATUS_OFF); //禁用状态
-        companyInfo.setCompanyCode("GYS"+ RamdonUtils.randomNumeric(4));//设置供应商编码
+        companyInfo.setCompanyCode(idGenerUtils.generateId(idGenerUtils.getGysIdName()));//设置供应商编码
         companyInfoService.save(companyInfo);
+
         //添加信息至 企业商务信息表
         CompanyBusinessInfo companyBusinessInfo = BeanUtils.copy(supplierCompanyReqVo, CompanyBusinessInfo.class);
         companyBusinessInfo.setCustomerId(companyInfo.getCompanyId());
@@ -167,11 +180,11 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
         if(ObjectUtils.isNotEmpty(payInfos)){
             for(PayInfo pageInfo:payInfos){
                 if(BasicConstant.PAYINFO_TYPE_BANK == pageInfo.getType()){
-                    supplierCompanyRspVo.setBankInfo(JsonUtils.convertValue(pageInfo.getPayInfoDesc(),BankInfo.class));
+                    supplierCompanyRspVo.setBankInfo(JsonUtils.convertValue(pageInfo.getPayInfoDesc(), BankInfo.class));
                 } else if(BasicConstant.PAYINFO_TYPE_ALIPAY == pageInfo.getType()){
-                    supplierCompanyRspVo.setAlipayInfo(JsonUtils.convertValue(pageInfo.getPayInfoDesc(),AlipayInfo.class));
+                    supplierCompanyRspVo.setAlipayInfo(JsonUtils.convertValue(pageInfo.getPayInfoDesc(), AlipayInfo.class));
                 } else if(BasicConstant.PAYINFO_TYPE_WECHAT == pageInfo.getType()){
-                    supplierCompanyRspVo.setWechatInfo(JsonUtils.convertValue(pageInfo.getPayInfoDesc(),WechatInfo.class));
+                    supplierCompanyRspVo.setWechatInfo(JsonUtils.convertValue(pageInfo.getPayInfoDesc(), WechatInfo.class));
                 }
             }
         }
@@ -197,7 +210,7 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
 
         companyInfoService.update(new LambdaUpdateWrapper<CompanyInfo>()
                 .eq(CompanyInfo::getCompanyId,companyId)
-                .set(CompanyInfo::getAuditStatus,BasicConstant.COMPANY_AUDIT_WAIT));
+                .set(CompanyInfo::getAuditStatus, BasicConstant.COMPANY_AUDIT_WAIT));
 
     }
 
@@ -205,7 +218,7 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
     public void audit(AuditInfoReqVo reqVo) {
         CompanyInfo companyInfo = companyInfoService.getByBId(reqVo.getAuditInfo());
         //
-        AuditInfo auditInfo = BeanUtils.copy(reqVo,AuditInfo.class);
+        AuditInfo auditInfo = BeanUtils.copy(reqVo, AuditInfo.class);
         auditInfoService.save(auditInfo);
 
         companyInfo.setAuditStatus(BasicConstant.COMPANY_AUDIT_OK); //已审核
@@ -217,24 +230,15 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
             //根据审核类型 以及 供应商状态
             if(BasicConstant.STATUS_ON == companyInfo.getStatus()){ //原状态是启用，则审核内容是  停用供应商
                 companyInfo.setStatus(BasicConstant.STATUS_OFF);
-                //停用供应商下的所有依赖方
-//                List<CompanyInfo> ylfList = companyInfoService.list(new QueryWrapper<CompanyInfo>().lambda()
-//                        .eq(CompanyInfo::getCompanyBusinessId,companyInfo.getCompanyId()));
-//                for(CompanyInfo com:ylfList){
-//                    com.setStatus(com.getStatus()+1);
-//                }
-//                companyInfoService.updateBatchByBId(ylfList);
+
                 //停用供应商的所有管理人员
                 oFFGYSAdminUser(companyInfo);
                 //下线供应商的所有产品
+                productInfoClientService.stopProduct(companyInfo.getCompanyCode());
+                //发送mq到 数据中心
+                mqProducerSend.enableCompanyInfo(companyInfo);
             }else{//原状态是停用，则审核内容是  启用供应商
-                //启用供应商下的所有依赖方
-//                List<CompanyInfo> ylfList = companyInfoService.list(new QueryWrapper<CompanyInfo>().lambda()
-//                        .eq(CompanyInfo::getCompanyBusinessId,companyInfo.getCompanyId()));
-//                for(CompanyInfo com:ylfList){
-//                    com.setStatus(com.getStatus()-1);
-//                }
-//                companyInfoService.updateBatchByBId(ylfList);
+
                 //启用供应商的所有管理人员
                 List<AdminUserInfo> adminList = adminUserInfoService.list(new QueryWrapper<AdminUserInfo>().lambda()
                         .eq(AdminUserInfo::getCompanyId,companyInfo.getCompanyId()));
@@ -246,11 +250,12 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
                     }
                 }
                 companyInfo.setStatus(BasicConstant.STATUS_ON);
-
+                //发送mq到 数据中心
+                mqProducerSend.pushCompanyInfo(companyInfo);
                 //上线供应商的所有产品
             }
         }else{ //审核失败，只需修改供应商审核状态
-
+            companyInfo.setAuditStatus(BasicConstant.COMPANY_AUDIT_BACK); //修改为 未通过
         }
         companyInfoService.updateByBId(companyInfo);
     }
@@ -268,7 +273,7 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
         //查找原企业商务信息
         CompanyBusinessInfo _comBus = companyBusinessInfoService.getOne(new LambdaQueryWrapper<CompanyBusinessInfo>()
                 .eq(CompanyBusinessInfo::getCustomerId,companyInfo.getCompanyId()));
-        CompanyBusinessInfo companyBusinessInfo = BeanUtils.copy(reqVo,CompanyBusinessInfo.class);
+        CompanyBusinessInfo companyBusinessInfo = BeanUtils.copy(reqVo, CompanyBusinessInfo.class);
         companyBusinessInfo.setCustomerId(companyInfo.getCompanyId());
         companyBusinessInfo.setComBusinessId(_comBus.getComBusinessId());
         companyBusinessInfoService.updateByBId(companyBusinessInfo);
@@ -294,7 +299,7 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
         oFFGYSAdminUser(companyInfo);
 
         //下线供应商的所有产品
-
+        productInfoClientService.stopProduct(companyInfo.getCompanyCode());
 
     }
 
@@ -306,7 +311,7 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
 //                .like(StringUtils.isNotBlank(reqVo.getCompanyName()), CompanyInfo::getCompanyName, reqVo.getCompanyName());
         // 设置分页参数
         IPage<CompanyInfo> page = new Page<>(reqVo.getPageNum(), reqVo.getPageSize());
-        IPage<SupplierCompanyPageReqVo> records = companyInfoDao.pageCompanyInfo(page,reqVo,BasicConstant.COMPANY_TYPE_GYX);
+        IPage<SupplierCompanyPageReqVo> records = companyInfoDao.pageCompanyInfo(page,reqVo, BasicConstant.COMPANY_TYPE_GYX);
         return records;
     }
 
@@ -321,12 +326,23 @@ public class RelyCompanyServiceImpl implements IRelyCompanyService {
         }
         List<CompanyInfo> records = companyInfoService.list(new LambdaQueryWrapper<CompanyInfo>()
                 .eq(CompanyInfo::getType,type)
-                .eq(CompanyInfo::getStatus,BasicConstant.STATUS_ON)
+                .eq(CompanyInfo::getStatus, BasicConstant.STATUS_ON)
                 .notInSql(CompanyInfo::getCompanyId,"select company_id from admin_user_info where company_id is not null"));
 
         if(ObjectUtils.isNotEmpty(records))
             return BeanUtils.copy(records,CompanySimpleRspVo.class);
         return null;
+    }
+
+    @Override
+    public List<RelyCompanyRspVo> listRelyCom() {
+        AdminUserInfo adminUserInfo = adminUserInfoService.getOne(
+                new LambdaQueryWrapper<AdminUserInfo>().eq(AdminUserInfo::getUserId,OmpContextUtils.getUserId()));
+        List<CompanyInfo> records = companyInfoDao.selectList(new LambdaQueryWrapper<CompanyInfo>()
+                .eq(CompanyInfo::getStatus,BasicConstant.STATUS_ON)
+                .eq(CompanyInfo::getType,BasicConstant.COMPANY_TYPE_YLF)
+                .eq(CompanyInfo::getCompanyBusinessId,adminUserInfo.getCompanyId()));
+        return BeanUtils.copy(records,RelyCompanyRspVo.class);
     }
 
     private void oFFGYSAdminUser(CompanyInfo companyInfo) {

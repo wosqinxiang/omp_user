@@ -2,16 +2,16 @@ package com.ahdms.user.center.service.impl;
 
 import com.ahdms.framework.core.commom.util.BeanUtils;
 import com.ahdms.framework.core.commom.util.OmpContextUtils;
-import com.ahdms.framework.core.context.OmpContext;
 import com.ahdms.framework.mybatis.service.impl.BaseServiceImpl;
+import com.ahdms.user.center.bean.entity.Role;
 import com.ahdms.user.center.bean.vo.RoleRspVo;
 import com.ahdms.user.center.dao.IRoleDao;
 import com.ahdms.user.center.service.IRoleService;
 import com.ahdms.user.center.service.IUserRoleService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.ahdms.user.center.bean.entity.Role;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -45,6 +45,19 @@ public class RoleServiceImpl extends BaseServiceImpl<IRoleDao, Role> implements 
     public List<RoleRspVo> allList() {
         List<Role> records = super.list();
         return BeanUtils.copy(records, RoleRspVo.class);
+    }
+
+    @Override
+    public Role selectByIdAndParentId(Long id,Long parentId) {
+        return roleDao.selectOne(new LambdaQueryWrapper<Role>()
+                .eq(Role::getId, id)
+                .eq(Role::getParentId, parentId));
+    }
+
+    @Override
+    public Role selectByRoleName(String roleName) {
+        return roleDao.selectOne(new LambdaQueryWrapper<Role>()
+                .eq(Role::getRoleName, roleName));
     }
 }
 

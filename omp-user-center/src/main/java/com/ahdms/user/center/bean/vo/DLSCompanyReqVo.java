@@ -13,11 +13,14 @@ import lombok.Data;
 @Data
 public class DLSCompanyReqVo {
 
+    @ApiModelProperty("供应商业务ID")
+    private Long companyId;
+
     @ApiModelProperty("名称")
     private String companyName;
 
-    @ApiModelProperty("类型(1.服务商、2.供应商、3.代理商, 4.产品依赖服务方)")
-    private Integer type;
+    @ApiModelProperty("企业组织机构代码")
+    private String companyBusiCode;
 
     @ApiModelProperty("行业")
     private String trade;
@@ -45,5 +48,8 @@ public class DLSCompanyReqVo {
 
     @ApiModelProperty("企业邮箱")
     private String companyEmail;
+
+    @ApiModelProperty("企业办公地址")
+    private String companyAddress;
 
 }

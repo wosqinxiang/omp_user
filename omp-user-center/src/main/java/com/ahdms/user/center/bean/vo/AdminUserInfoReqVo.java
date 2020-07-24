@@ -1,9 +1,10 @@
 package com.ahdms.user.center.bean.vo;
 
-import lombok.Data;
-import javax.validation.constraints.NotBlank;
-import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import javax.validation.constraints.Pattern;
+
 /**
  * <B>说明：</B><BR>
  *
@@ -18,6 +19,7 @@ public class AdminUserInfoReqVo  {
     private Long adminId;
 
     @ApiModelProperty("用户名")
+    @Pattern(regexp = ".{8,16}",message = "输入的账号名格式有误")
     private String username;
 
     @ApiModelProperty("手机号")
@@ -29,13 +31,19 @@ public class AdminUserInfoReqVo  {
     @ApiModelProperty("姓名")
     private String name;
 
+    @ApiModelProperty("邮箱")
+    private String email;
+
     @ApiModelProperty("角色ID")
-    private String roleId;
+    private Long roleId;
 
     @ApiModelProperty("商家业务主键")
     private Long companyId;
 
     @ApiModelProperty("所属部门")
     private Integer departmentId;
+
+    @ApiModelProperty("0.启用，1.停用")
+    private Integer status;
 
 }

@@ -1,7 +1,10 @@
 package com.ahdms.user.center.service;
 
 import com.ahdms.framework.mybatis.service.BaseService;
+import com.ahdms.user.center.bean.bo.TradeInfoBo;
 import com.ahdms.user.center.bean.entity.TradeInfo;
+
+import java.util.List;
 
 /**
  * <B>说明：服务</B><BR>
@@ -13,4 +16,5 @@ import com.ahdms.user.center.bean.entity.TradeInfo;
 public interface ITradeInfoService extends BaseService<TradeInfo> {
 
 
+    List<TradeInfoBo> listLevel();
 }

@@ -9,10 +9,6 @@ import com.ahdms.user.center.bean.vo.CompanyBusinessInfoRspVo;
 import com.ahdms.user.center.bean.vo.CustomerComBusiRspVo;
 
 import java.util.List;
-import com.ahdms.user.center.bean.entity.CompanyInfo;
-import com.ahdms.user.center.bo.CompanyBusinessInfoPageBo;
-import com.ahdms.user.center.bo.CompanyInfoPageBo;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 
 /**
  * <B>说明：服务</B><BR>

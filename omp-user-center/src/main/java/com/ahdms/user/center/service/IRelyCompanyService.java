@@ -11,6 +11,7 @@ import java.util.List;
  * @date 2020-07-17 12:58
  */
 public interface IRelyCompanyService {
+
     void addrelyCompany(String companyName);
 
     IPage<CompanyInfo> page(RelyCompanyPageVo company);
@@ -32,4 +33,6 @@ public interface IRelyCompanyService {
     IPage pageGYS(SupplierCompanyPageReqVo reqVo);
 
     List<CompanySimpleRspVo> listCompanyInfos(Long roleId);
+
+    List<RelyCompanyRspVo> listRelyCom();
 }

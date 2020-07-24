@@ -3,8 +3,6 @@ package com.ahdms.user.center.bean.bo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.util.Date;
-
 /**
  * @author qinxiang
  * @date 2020-07-13 17:27

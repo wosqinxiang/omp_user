@@ -1,9 +1,9 @@
 package com.ahdms.user.center.bean.vo;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import java.util.Date;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.util.Date;
 
 /**
  * <B>说明：</B><BR>
@@ -47,4 +47,8 @@ public class CustomerInfoRspVo  {
 
     @ApiModelProperty("更新时间")
     private Date updatedAt;
+
+    @ApiModelProperty("角色名称")
+    private String roleName;
+
 }

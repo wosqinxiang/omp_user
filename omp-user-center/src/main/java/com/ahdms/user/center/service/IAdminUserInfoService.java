@@ -1,8 +1,11 @@
 package com.ahdms.user.center.service;
 
 import com.ahdms.framework.mybatis.service.BaseService;
+import com.ahdms.user.center.bean.bo.AdminInfoBasicBo;
+import com.ahdms.user.center.bean.bo.AdminInfoBo;
+import com.ahdms.user.center.bean.bo.AdminUserPageQueryBo;
+import com.ahdms.user.center.bean.bo.UserInfoBo;
 import com.ahdms.user.center.bean.entity.AdminUserInfo;
-import com.ahdms.user.center.bean.vo.AdminUserInfoPageReqVo;
 import com.ahdms.user.center.bean.vo.AdminUserInfoReqVo;
 import com.ahdms.user.center.bean.vo.AdminUserInfoRspVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -17,15 +20,19 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface IAdminUserInfoService extends BaseService<AdminUserInfo> {
 
 
-    void addAdmin(AdminUserInfoReqVo adminUserInfoReqVo);
-
-    IPage pageAdminInfos(AdminUserInfoPageReqVo pageQueryVo);
+    IPage pageAdminInfos(AdminUserPageQueryBo adminInfoBo);
 
     void resetAdminPWD(Long adminId, String newPassword);
 
     void statusAdminInfo(Long adminId, Integer status);
 
-    void updateAdmin(AdminUserInfoReqVo adminUserInfoReqVo);
+    void updateAdmin(AdminInfoBasicBo adminInfoBasicBo);
 
-    AdminUserInfoRspVo showAdminInfo(Long adminId);
+    AdminInfoBasicBo showAdminInfo(Long adminId);
+
+    AdminInfoBasicBo showAdminInfo();
+
+    void addAdmin(UserInfoBo userInfoBo, AdminInfoBo adminInfoBo);
+
+    AdminUserInfo selectByUserId(Long userId);
 }

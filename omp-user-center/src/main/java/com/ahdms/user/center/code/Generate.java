@@ -1,6 +1,9 @@
 package com.ahdms.user.center.code;
 
+import com.ahdms.framework.core.commom.util.DigestUtils;
+import com.ahdms.framework.core.commom.util.IdGenerateUtils;
 import com.ahdms.framework.core.commom.util.SpringUtils;
+import com.ahdms.framework.core.web.response.ResultAssert;
 import com.ahdms.framework.mybatis.generate.AutoGenerator;
 import com.ahdms.framework.mybatis.generate.ConfigGenerator;
 
@@ -14,9 +17,14 @@ import java.util.Properties;
 public class Generate {
 
     public static void main(String[] args) {
-        ConfigGenerator config = buildConfig();
-        AutoGenerator generator = new AutoGenerator(config);
-        generator.run();
+//        ConfigGenerator config = buildConfig();
+//        AutoGenerator generator = new AutoGenerator(config);
+//        generator.run();
+        System.out.println(DigestUtils.md5Hex("AHdms520"));
+//        ResultAssert.assertTrue(false,"aaaaa");
+//        ResultAssert.throwFail(ApiCode.USER_LOGIN_PWD_ERROR);
+        String id = IdGenerateUtils.generateId("USER");
+        System.out.println(id);
     }
 
     private static ConfigGenerator buildConfig() {
